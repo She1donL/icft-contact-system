@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# Environment variables and secrets
+.env
+.env.local
+.env.*.local
+
+# Deployment
+.vercel/
+
+# Testing and logs
+coverage/
+*.log
+
+# macOS
+.DS_Store
+
+# Private data exports
+*.csv
+*.xlsx
+database-exports/
+private-data/
