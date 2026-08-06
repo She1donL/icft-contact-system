@@ -2,3 +2,8 @@
 * { box-sizing: border-box; padding: 0; margin: 0; }
 html { min-height: 100%; }
 body { min-height: 100vh; color: var(--foreground); background: var(--background); font-family: Arial, Helvetica, sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+.auth-page { min-height: 100vh; display: grid; place-items: center; padding: 24px; background: #f4f7f5; }
+.auth-card { display: grid; width: min(100%, 430px); gap: 16px; padding: 32px; border-radius: 16px; background: #fff; box-shadow: 0 10px 30px #164a3d1a; }
+.auth-card label { display: grid; gap: 6px; font-weight: 700; }
+.auth-card input, .auth-card button { min-height: 44px; padding: 10px; font: inherit; }
+.auth-card button { border: 0; border-radius: 8px; color: #fff; background: #164a3d; cursor: pointer; }

@@ -1,6 +1,6 @@
 begin;
 
-select plan(26);
+select plan(29);
 
 insert into public.contacts (first_name, last_name, email, roles, country_region, conference_updates_consent)
 values ('Ada', 'Lovelace', 'ada@example.test', array['Researcher'], 'Canada', true);
@@ -38,7 +38,9 @@ values
   ('00000000-0000-0000-0000-000000000101', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'non-admin@example.test', '', now(), '{}'::jsonb, '{}'::jsonb, now(), now()),
   ('00000000-0000-0000-0000-000000000102', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'approved-admin@example.test', '', now(), '{}'::jsonb, '{}'::jsonb, now(), now());
 insert into public.admin_profiles (id, is_approved, approved_at)
-values ('00000000-0000-0000-0000-000000000102', true, now());
+values
+  ('00000000-0000-0000-0000-000000000101', false, null),
+  ('00000000-0000-0000-0000-000000000102', true, now());
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000101', true);
@@ -46,6 +48,13 @@ select is((select count(*) from public.contacts), 0::bigint, 'an authenticated n
 update public.contacts set status = 'reviewed' where email = 'ada@example.test';
 reset role;
 select is((select status::text from public.contacts where first_name = 'Augusta'), 'new', 'an authenticated non-admin cannot update contacts');
+
+set local role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000101', true);
+select is((select count(*) from public.admin_profiles), 1::bigint, 'an authenticated user can read only their own admin profile');
+select is((select is_approved from public.admin_profiles), false, 'an authenticated user cannot read another approval state');
+select throws_ok($$update public.admin_profiles set is_approved = true$$, '42501', 'permission denied for table admin_profiles', 'an authenticated user cannot self-approve');
+reset role;
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000102', true);

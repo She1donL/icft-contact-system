@@ -1,0 +1,4 @@
+import { messages } from "@/messages/en";
+import { SubmitButton } from "@/components/auth/submit-button";
+import { updatePassword } from "./actions";
+export default async function UpdatePasswordPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) { const params = await searchParams; return <main className="auth-page"><form action={updatePassword} className="auth-card"><h1>{messages.auth.updatePasswordTitle}</h1>{params.error && <p role="alert">{messages.auth.genericAuthError}</p>}<label>{messages.auth.newPasswordLabel}<input name="password" type="password" autoComplete="new-password" required minLength={8} /></label><SubmitButton pendingLabel={messages.auth.working}>{messages.auth.updatePassword}</SubmitButton></form></main>; }
