@@ -1,0 +1,61 @@
+begin;
+
+select plan(19);
+
+insert into public.contacts (first_name, last_name, email, roles, country_region, conference_updates_consent)
+values ('Ada', 'Lovelace', 'ada@example.test', array['Researcher'], 'Canada', true);
+
+select matches((select record_id from public.contacts where email = 'ada@example.test'), '^ICFT-C-000001$', 'the first record ID uses the ICFT-C-000001 format');
+select throws_ok($$update public.contacts set record_id = 'ICFT-C-999999' where email = 'ada@example.test'$$, 'record_id is immutable', 'record IDs cannot be changed');
+select ok((select updated_at from public.contacts where email = 'ada@example.test') <= clock_timestamp(), 'contacts receive an updated_at timestamp');
+
+update public.contacts set first_name = 'Augusta' where email = 'ada@example.test';
+select ok((select updated_at > created_at from public.contacts where email = 'ada@example.test'), 'updated_at advances after an update');
+
+insert into public.contacts (first_name, last_name, email, roles, country_region, conference_updates_consent)
+values ('Grace', 'Hopper', 'ada@example.test', array['Professor / Faculty Member'], 'Canada', false);
+select is((select duplicate_status::text from public.contacts where first_name = 'Augusta'), 'possible_duplicate', 'an existing matching email is marked possible_duplicate');
+select is((select duplicate_status::text from public.contacts where first_name = 'Grace'), 'possible_duplicate', 'a retained duplicate submission is marked possible_duplicate');
+
+update public.contacts set archived_at = clock_timestamp() where first_name = 'Augusta';
+insert into public.contacts (first_name, last_name, email, roles, country_region, conference_updates_consent)
+values ('Katherine', 'Johnson', 'ada@example.test', array['Researcher'], 'Canada', true);
+select is((select duplicate_status::text from public.contacts where first_name = 'Katherine'), 'possible_duplicate', 'archived records remain part of duplicate detection');
+
+update public.contacts set email = 'grace@example.test' where first_name = 'Grace';
+select is((select duplicate_status::text from public.contacts where first_name = 'Augusta'), 'possible_duplicate', 'changing an email recalculates the old duplicate group');
+select is((select duplicate_status::text from public.contacts where first_name = 'Grace'), 'no_duplicate_detected', 'changing an email recalculates the new duplicate group');
+
+set local role anon;
+select throws_ok($$select * from public.contacts$$, '42501', 'permission denied for table contacts', 'anonymous users cannot select contacts');
+select throws_ok($$insert into public.contacts (first_name, last_name, email, roles, country_region, conference_updates_consent) values ('Anonymous', 'User', 'anonymous@example.test', array['Researcher'], 'Canada', true)$$, '42501', 'permission denied for table contacts', 'anonymous users cannot insert contacts');
+select throws_ok($$update public.contacts set status = 'reviewed'$$, '42501', 'permission denied for table contacts', 'anonymous users cannot update contacts');
+select throws_ok($$delete from public.contacts$$, '42501', 'permission denied for table contacts', 'anonymous users cannot delete contacts');
+reset role;
+
+insert into auth.users (id, instance_id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+values
+  ('00000000-0000-0000-0000-000000000101', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'non-admin@example.test', '', now(), '{}'::jsonb, '{}'::jsonb, now(), now()),
+  ('00000000-0000-0000-0000-000000000102', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'approved-admin@example.test', '', now(), '{}'::jsonb, '{}'::jsonb, now(), now());
+insert into public.admin_profiles (id, is_approved, approved_at)
+values ('00000000-0000-0000-0000-000000000102', true, now());
+
+set local role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000101', true);
+select is((select count(*) from public.contacts), 0::bigint, 'an authenticated non-admin cannot read contacts');
+update public.contacts set status = 'reviewed' where email = 'ada@example.test';
+reset role;
+select is((select status::text from public.contacts where first_name = 'Augusta'), 'new', 'an authenticated non-admin cannot update contacts');
+
+set local role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000102', true);
+select is((select count(*) from public.contacts), 3::bigint, 'an approved administrator can read contacts');
+update public.contacts set status = 'reviewed' where first_name = 'Grace';
+select is((select status::text from public.contacts where first_name = 'Grace'), 'reviewed', 'an approved administrator can update contacts');
+reset role;
+
+select policies_are('public', 'contacts', array['approved administrators can read contacts', 'approved administrators can update contacts'], 'contacts expose only approved-administrator RLS policies');
+select ok((select relrowsecurity from pg_class where oid = 'public.contacts'::regclass), 'RLS is enabled for contacts');
+
+select * from finish();
+rollback;
