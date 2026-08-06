@@ -1,6 +1,6 @@
 begin;
 
-select plan(19);
+select plan(26);
 
 insert into public.contacts (first_name, last_name, email, roles, country_region, conference_updates_consent)
 values ('Ada', 'Lovelace', 'ada@example.test', array['Researcher'], 'Canada', true);
@@ -56,6 +56,13 @@ reset role;
 
 select policies_are('public', 'contacts', array['approved administrators can read contacts', 'approved administrators can update contacts'], 'contacts expose only approved-administrator RLS policies');
 select ok((select relrowsecurity from pg_class where oid = 'public.contacts'::regclass), 'RLS is enabled for contacts');
+select ok((select relrowsecurity from pg_class where oid = 'public.admin_profiles'::regclass), 'RLS is enabled for admin_profiles');
+select ok(not exists (select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.proname = 'is_approved_admin'), 'public.is_approved_admin no longer exists');
+select ok(exists (select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'private' and p.proname = 'is_approved_admin' and p.prosecdef), 'private.is_approved_admin is SECURITY DEFINER');
+select ok(not has_schema_privilege('anon', 'private', 'usage'), 'anon cannot use the private schema');
+select ok(has_schema_privilege('authenticated', 'private', 'usage'), 'authenticated has only required private schema usage');
+select ok(not has_function_privilege('anon', 'private.is_approved_admin()', 'execute'), 'anon cannot execute private.is_approved_admin');
+select ok(has_function_privilege('authenticated', 'private.is_approved_admin()', 'execute'), 'authenticated can execute private.is_approved_admin for RLS evaluation');
 
 select * from finish();
 rollback;
