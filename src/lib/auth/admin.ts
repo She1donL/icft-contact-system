@@ -1,18 +1,28 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-export async function requireApprovedAdmin() {
+export async function getCurrentAdminAccess() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
 
-  if (!user) redirect("/admin/login");
+  if (userError || !user) return { user: null, isApproved: false };
 
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from("admin_profiles")
     .select("is_approved")
     .eq("id", user.id)
     .maybeSingle();
 
-  if (!profile?.is_approved) redirect("/admin/not-authorized");
+  return { user, isApproved: !profileError && profile?.is_approved === true };
+}
+
+export async function requireApprovedAdmin() {
+  const { user, isApproved } = await getCurrentAdminAccess();
+
+  if (!user) redirect("/admin/login");
+  if (!isApproved) redirect("/admin/not-authorized");
   return user;
 }

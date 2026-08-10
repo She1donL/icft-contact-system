@@ -12,7 +12,10 @@ export async function login(formData: FormData) {
   const next = safeNextPath(String(formData.get("next") ?? ""));
   if (!email || !password) redirect(loginError);
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) redirect(loginError);
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error || !data.user || !data.session) {
+    await supabase.auth.signOut();
+    redirect(loginError);
+  }
   redirect(next);
 }
