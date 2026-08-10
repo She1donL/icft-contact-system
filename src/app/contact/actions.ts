@@ -1,22 +1,35 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
+import { processPublicContactSubmission } from "@/lib/contacts/public-submission";
+import { getTrustedClientIdentifier } from "@/lib/security/client-identifier";
+import { isContactSubmissionAllowed } from "@/lib/security/rate-limit";
+import { verifyTurnstileToken } from "@/lib/security/turnstile";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { type ContactSubmissionErrors, validateContactSubmission } from "@/lib/validation/contact-submission";
+import { type ContactSubmissionErrors } from "@/lib/validation/contact-submission";
 
 export type ContactSubmissionState = { errors: ContactSubmissionErrors };
 export const initialContactSubmissionState: ContactSubmissionState = { errors: {} };
 
 export async function submitContact(_previousState: ContactSubmissionState, formData: FormData): Promise<ContactSubmissionState> {
-  const validation = validateContactSubmission(formData);
-  if (!validation.success) return { errors: validation.errors };
+  const requestHeaders = await headers();
+  const clientIdentifier = getTrustedClientIdentifier(requestHeaders);
+  const result = await processPublicContactSubmission(formData, {
+    clientIdentifier,
+    isRateLimitedSubmissionAllowed: isContactSubmissionAllowed,
+    verifyTurnstile: (token, identifier) => verifyTurnstileToken({ token, remoteIp: identifier }),
+    async insertContact(data) {
+      try {
+        const { error } = await createAdminClient().from("contacts").insert(data);
+        return !error;
+      } catch {
+        return false;
+      }
+    },
+  });
 
-  try {
-    const { error } = await createAdminClient().from("contacts").insert(validation.data);
-    if (error) return { errors: { form: "We could not submit your information. Please try again." } };
-  } catch {
-    return { errors: { form: "We could not submit your information. Please try again." } };
-  }
+  if (!result.success) return { errors: result.errors };
 
   redirect("/contact/success");
 }

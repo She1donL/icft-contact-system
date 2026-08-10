@@ -16,6 +16,10 @@ pnpm run lint
 pnpm run build
 ```
 
+## Public-form anti-abuse configuration
+
+Before releasing the public QR code, configure Cloudflare Turnstile and Upstash Redis in the deployment environment. Use Cloudflare's official Turnstile test keys for localhost and automated testing; never use production Turnstile credentials locally. The Secret Key, Turnstile secret, and Upstash credentials are server-only and must never use a `NEXT_PUBLIC_` prefix.
+
 ## Project structure
 
 - `src/app` — App Router routes and global styles

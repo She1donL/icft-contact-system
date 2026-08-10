@@ -11,4 +11,5 @@
 .help { font-size: 0.9rem; font-weight: 400; line-height: 1.45; color: #42534a; }
 .error { font-size: 0.9rem; font-weight: 700; color: #a31621; }
 .privacy { padding: 14px; border-radius: 8px; line-height: 1.5; color: #31433a; background: #e3efe8; }
+.form section[aria-label="Security verification"] { display: grid; gap: 8px; font-size: 0.9rem; color: #42534a; }
 .honeypot { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }

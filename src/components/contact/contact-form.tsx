@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import { countryRegionOptions, roleOptions } from "@/lib/contacts/options";
 import { initialContactSubmissionState, submitContact } from "@/app/contact/actions";
 import { messages } from "@/messages/en";
+import { TurnstileWidget } from "./turnstile-widget";
 import styles from "./contact-form.module.css";
 
 function FieldError({ id, message }: { id: string; message?: string }) {
@@ -14,6 +15,7 @@ export function ContactForm() {
   const [state, formAction, pending] = useActionState(submitContact, initialContactSubmissionState);
   const [hasOtherRole, setHasOtherRole] = useState(false);
   const errors = state?.errors ?? {};
+  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
 
   return <form action={formAction} className={styles.form} noValidate>
     {errors.form && <p className={styles.error} role="alert">{errors.form}</p>}
@@ -31,6 +33,7 @@ export function ContactForm() {
     <label>Specific Research Area or Professional Interest <textarea name="specificResearchArea" rows={5} aria-describedby="specificResearchArea-help specificResearchArea-error" /><span id="specificResearchArea-help" className={styles.help}>Please briefly describe your specific research area, professional focus, or topic of interest.</span></label><FieldError id="specificResearchArea-error" message={errors.specificResearchArea} />
     <fieldset aria-describedby="conferenceUpdatesConsent-error"><legend>Would you like to receive conference announcements and related updates by email?</legend><label className={styles.choice}><input type="radio" name="conferenceUpdatesConsent" value="yes" required />Yes</label><label className={styles.choice}><input type="radio" name="conferenceUpdatesConsent" value="no" required />No</label></fieldset><FieldError id="conferenceUpdatesConsent-error" message={errors.conferenceUpdatesConsent} />
     <p className={styles.privacy}>{messages.contact.privacy}</p>
-    <button type="submit" disabled={pending} aria-disabled={pending}>{pending ? messages.contact.submitting : messages.contact.submit}</button>
+    <TurnstileWidget siteKey={siteKey} resetSignal={errors.form} />
+    <button type="submit" disabled={pending || !siteKey} aria-disabled={pending || !siteKey}>{pending ? messages.contact.submitting : messages.contact.submit}</button>
   </form>;
 }

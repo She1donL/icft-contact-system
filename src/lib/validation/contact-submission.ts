@@ -2,7 +2,7 @@ import { countryRegionValues, roleOptions, type ContactRole } from "@/lib/contac
 
 export const contactFieldNames = [
   "firstName", "lastName", "preferredName", "email", "roles", "otherRole", "organization",
-  "professionalTitle", "countryRegion", "generalField", "specificResearchArea", "conferenceUpdatesConsent", "website",
+  "professionalTitle", "countryRegion", "generalField", "specificResearchArea", "conferenceUpdatesConsent", "website", "turnstileToken",
 ] as const;
 
 export type ContactFieldName = (typeof contactFieldNames)[number];
@@ -31,6 +31,10 @@ export type ContactValidationResult =
 const allowedFields = new Set<string>(contactFieldNames);
 const allowedRoles = new Set<string>(roleOptions);
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/u;
+
+export function isHoneypotTriggered(formData: FormData) {
+  return Boolean(valueFor(formData, "website"));
+}
 
 function valueFor(formData: FormData, name: ContactFieldName): string | null {
   const value = formData.get(name);
@@ -67,7 +71,7 @@ export function validateContactSubmission(formData: FormData): ContactValidation
     return { success: false, errors: { form: "Unable to submit this form." } };
   }
 
-  if (valueFor(formData, "website")) {
+  if (isHoneypotTriggered(formData)) {
     return { success: false, errors: { form: "Unable to submit this form." } };
   }
 
