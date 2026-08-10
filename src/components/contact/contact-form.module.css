@@ -1,0 +1,14 @@
+.form { display: grid; gap: 14px; }
+.form label, .form fieldset { display: grid; gap: 7px; font-weight: 700; }
+.form input, .form select, .form textarea, .form button { width: 100%; min-height: 44px; padding: 10px; border: 1px solid #9fb1a7; border-radius: 8px; font: inherit; color: #17231d; background: #fff; }
+.form textarea { min-height: 130px; resize: vertical; }
+.form fieldset { padding: 14px; border: 1px solid #9fb1a7; border-radius: 8px; }
+.form legend { padding: 0 4px; font-weight: 700; }
+.form .choice { display: flex; align-items: center; gap: 9px; font-weight: 400; }
+.form .choice input { width: 18px; min-height: 18px; padding: 0; }
+.form button { border: 0; font-weight: 700; color: #fff; background: #164a3d; cursor: pointer; }
+.form button:disabled { cursor: wait; opacity: 0.75; }
+.help { font-size: 0.9rem; font-weight: 400; line-height: 1.45; color: #42534a; }
+.error { font-size: 0.9rem; font-weight: 700; color: #a31621; }
+.privacy { padding: 14px; border-radius: 8px; line-height: 1.5; color: #31433a; background: #e3efe8; }
+.honeypot { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }

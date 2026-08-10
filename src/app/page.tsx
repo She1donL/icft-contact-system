@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { messages } from "@/messages/en";
 import styles from "./page.module.css";
 
@@ -9,7 +10,7 @@ export default function Home() {
         <div className={styles.logoPlaceholder} aria-label={messages.landing.logoAlt}>ICFT</div>
         <h1 id="page-title">{messages.landing.title}</h1>
         <p className={styles.introduction}>{messages.landing.introduction}</p>
-        <button className={styles.cta} type="button" disabled>{messages.landing.submitButton}</button>
+        <Link className={styles.cta} href="/contact">{messages.landing.submitButton}</Link>
         <p className={styles.availabilityNote}>{messages.landing.availabilityNote}</p>
       </section>
       <section className={styles.details} aria-label="Contact and privacy information">
