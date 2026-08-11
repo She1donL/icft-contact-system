@@ -17,11 +17,18 @@ export async function submitContact(_previousState: ContactSubmissionState, form
     isRateLimitedSubmissionAllowed: isContactSubmissionAllowed,
     verifyTurnstile: (token, identifier) => verifyTurnstileToken({ token, remoteIp: identifier }),
     async insertContact(data) {
+      let supabase;
       try {
-        const { error } = await createAdminClient().from("contacts").insert(data);
-        return !error;
+        supabase = createAdminClient();
       } catch {
-        return false;
+        return { success: false, stage: "supabase_client_initialization" };
+      }
+
+      try {
+        const { error } = await supabase.from("contacts").insert(data);
+        return error ? { success: false, stage: "supabase_insert" } : { success: true };
+      } catch {
+        return { success: false, stage: "supabase_insert" };
       }
     },
   });

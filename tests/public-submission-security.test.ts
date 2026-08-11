@@ -38,22 +38,26 @@ describe("public submission security boundary", () => {
       clientIdentifier: "ip:test",
       isRateLimitedSubmissionAllowed: async () => { events.push("rate"); return true; },
       verifyTurnstile: async () => { events.push("turnstile"); return true; },
-      insertContact: async () => { events.push("insert"); return true; },
+      insertContact: async () => { events.push("insert"); return { success: true }; },
     });
     expect(result).toEqual({ success: true });
     expect(events).toEqual(["rate", "turnstile", "insert"]);
   });
 
   it("returns a generic result for rate-limit, honeypot, and insert failures", async () => {
-    const blocked = await processPublicContactSubmission(validForm(), { clientIdentifier: "ip:test", isRateLimitedSubmissionAllowed: async () => false, verifyTurnstile: async () => true, insertContact: async () => true });
+    const warning = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const blocked = await processPublicContactSubmission(validForm(), { clientIdentifier: "ip:test", isRateLimitedSubmissionAllowed: async () => false, verifyTurnstile: async () => true, insertContact: async () => ({ success: true }) });
     const honeypotForm = validForm(); honeypotForm.set("website", "bot");
-    const honeypot = await processPublicContactSubmission(honeypotForm, { clientIdentifier: "ip:test", isRateLimitedSubmissionAllowed: async () => true, verifyTurnstile: async () => true, insertContact: async () => true });
-    const insertFailure = await processPublicContactSubmission(validForm(), { clientIdentifier: "ip:test", isRateLimitedSubmissionAllowed: async () => true, verifyTurnstile: async () => true, insertContact: async () => false });
+    const honeypot = await processPublicContactSubmission(honeypotForm, { clientIdentifier: "ip:test", isRateLimitedSubmissionAllowed: async () => true, verifyTurnstile: async () => true, insertContact: async () => ({ success: true }) });
+    const insertFailure = await processPublicContactSubmission(validForm(), { clientIdentifier: "ip:test", isRateLimitedSubmissionAllowed: async () => true, verifyTurnstile: async () => true, insertContact: async () => ({ success: false, stage: "supabase_insert" }) });
     for (const result of [blocked, honeypot, insertFailure]) expect(result).toMatchObject({ success: false, errors: { form: "We could not submit your information. Please try again." } });
+    expect(warning).toHaveBeenCalledWith("contact submission failed at rate_limit");
+    expect(warning).toHaveBeenCalledWith("contact submission failed at supabase_insert");
+    warning.mockRestore();
   });
 
   it("gives a duplicate insert the same public success behavior", async () => {
-    const result = await processPublicContactSubmission(validForm(), { clientIdentifier: "ip:test", isRateLimitedSubmissionAllowed: async () => true, verifyTurnstile: async () => true, insertContact: async () => true });
+    const result = await processPublicContactSubmission(validForm(), { clientIdentifier: "ip:test", isRateLimitedSubmissionAllowed: async () => true, verifyTurnstile: async () => true, insertContact: async () => ({ success: true }) });
     expect(result).toEqual({ success: true });
   });
 });
