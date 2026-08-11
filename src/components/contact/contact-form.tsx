@@ -2,7 +2,8 @@
 
 import { useActionState, useState } from "react";
 import { countryRegionOptions, roleOptions } from "@/lib/contacts/options";
-import { initialContactSubmissionState, submitContact } from "@/app/contact/actions";
+import { submitContact } from "@/app/contact/actions";
+import { initialContactSubmissionState } from "@/app/contact/action-state";
 import { messages } from "@/messages/en";
 import { TurnstileWidget } from "./turnstile-widget";
 import styles from "./contact-form.module.css";

@@ -7,10 +7,7 @@ import { getTrustedClientIdentifier } from "@/lib/security/client-identifier";
 import { isContactSubmissionAllowed } from "@/lib/security/rate-limit";
 import { verifyTurnstileToken } from "@/lib/security/turnstile";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { type ContactSubmissionErrors } from "@/lib/validation/contact-submission";
-
-export type ContactSubmissionState = { errors: ContactSubmissionErrors };
-export const initialContactSubmissionState: ContactSubmissionState = { errors: {} };
+import type { ContactSubmissionState } from "./action-state";
 
 export async function submitContact(_previousState: ContactSubmissionState, formData: FormData): Promise<ContactSubmissionState> {
   const requestHeaders = await headers();
