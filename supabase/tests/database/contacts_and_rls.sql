@@ -1,6 +1,6 @@
 begin;
 
-select plan(37);
+select plan(40);
 
 insert into public.contacts (first_name, last_name, email, roles, country_region, conference_updates_consent)
 values ('Ada', 'Lovelace', 'ada@example.test', array['Researcher'], 'Canada', true);
@@ -61,6 +61,8 @@ select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000102
 select is((select count(*) from public.contacts), 3::bigint, 'an approved administrator can read contacts');
 update public.contacts set status = 'reviewed' where first_name = 'Grace';
 select is((select status::text from public.contacts where first_name = 'Grace'), 'reviewed', 'an approved administrator can update contacts');
+update public.contacts set email = 'approved-admin-edit@example.test' where first_name = 'Grace';
+select is((select email from public.contacts where first_name = 'Grace'), 'approved-admin-edit@example.test', 'an approved administrator can edit an email through the duplicate trigger');
 reset role;
 
 select policies_are('public', 'contacts', array['approved administrators can read contacts', 'approved administrators can update contacts'], 'contacts expose only approved-administrator RLS policies');
@@ -72,6 +74,8 @@ select ok(not has_schema_privilege('anon', 'private', 'usage'), 'anon cannot use
 select ok(has_schema_privilege('authenticated', 'private', 'usage'), 'authenticated has only required private schema usage');
 select ok(not has_function_privilege('anon', 'private.is_approved_admin()', 'execute'), 'anon cannot execute private.is_approved_admin');
 select ok(has_function_privilege('authenticated', 'private.is_approved_admin()', 'execute'), 'authenticated can execute private.is_approved_admin for RLS evaluation');
+select ok(exists (select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.proname = 'refresh_contact_duplicate_status' and p.prosecdef), 'duplicate trigger function runs with controlled definer privileges');
+select ok(not has_function_privilege('authenticated', 'public.recalculate_duplicate_status(text)', 'execute'), 'authenticated cannot directly invoke duplicate recalculation');
 
 select ok(has_table_privilege('service_role', 'public.contacts', 'INSERT'), 'service_role can insert contacts for the server-side submission boundary');
 select ok(has_table_privilege('service_role', 'public.contacts', 'UPDATE'), 'service_role can run duplicate-status updates triggered by a submission');
