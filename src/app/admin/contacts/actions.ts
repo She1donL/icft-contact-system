@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireApprovedAdmin } from "@/lib/auth/admin";
-import { validateAdminContactUpdate } from "@/lib/contacts/admin";
+import { isAllowedDuplicateReviewAction, validateAdminContactUpdate } from "@/lib/contacts/admin";
 import { createClient } from "@/lib/supabase/server";
 
 type SupabaseErrorMetadata = { code?: unknown };
@@ -33,4 +33,12 @@ export async function setContactArchived(id: string, archived: boolean) {
   const { error } = await supabase.from("contacts").update({ archived_at: archived ? new Date().toISOString() : null }).eq("id", id);
   if (error) redirect(`/admin/contacts/${id}?error=archive`);
   revalidatePath("/admin"); revalidatePath(`/admin/contacts/${id}`); redirect(`/admin/contacts/${id}`);
+}
+
+export async function setDuplicateReviewState(id: string, state: string) {
+  await requireApprovedAdmin();
+  if (!isAllowedDuplicateReviewAction(state)) redirect(`/admin/contacts/${id}?error=duplicate`);
+  const supabase = await createClient(); const { data, error } = await supabase.from("contacts").update({ duplicate_status: state }).eq("id", id).eq("duplicate_status", "possible_duplicate").select("id").maybeSingle();
+  if (error || !data) redirect(`/admin/contacts/${id}?error=duplicate`);
+  revalidatePath("/admin"); revalidatePath(`/admin/contacts/${id}`); revalidatePath(`/admin/duplicates/${id}`); redirect(`/admin/duplicates/${id}?saved=1`);
 }

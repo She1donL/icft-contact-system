@@ -1,6 +1,6 @@
 begin;
 
-select plan(40);
+select plan(42);
 
 insert into public.contacts (first_name, last_name, email, roles, country_region, conference_updates_consent)
 values ('Ada', 'Lovelace', 'ada@example.test', array['Researcher'], 'Canada', true);
@@ -63,6 +63,10 @@ update public.contacts set status = 'reviewed' where first_name = 'Grace';
 select is((select status::text from public.contacts where first_name = 'Grace'), 'reviewed', 'an approved administrator can update contacts');
 update public.contacts set email = 'approved-admin-edit@example.test' where first_name = 'Grace';
 select is((select email from public.contacts where first_name = 'Grace'), 'approved-admin-edit@example.test', 'an approved administrator can edit an email through the duplicate trigger');
+update public.contacts set duplicate_status = 'reviewed' where first_name = 'Augusta';
+select is((select duplicate_status::text from public.contacts where first_name = 'Augusta'), 'reviewed', 'an approved administrator can mark a duplicate reviewed');
+update public.contacts set duplicate_status = 'keep_separate' where first_name = 'Katherine';
+select is((select duplicate_status::text from public.contacts where first_name = 'Katherine'), 'keep_separate', 'an approved administrator can keep a duplicate separate');
 reset role;
 
 select policies_are('public', 'contacts', array['approved administrators can read contacts', 'approved administrators can update contacts'], 'contacts expose only approved-administrator RLS policies');

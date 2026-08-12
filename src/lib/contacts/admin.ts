@@ -1,6 +1,7 @@
 import { countryRegionValues, roleOptions, type ContactRole } from "@/lib/contacts/options";
 
 export const contactStatuses = ["new", "reviewed", "contacted", "follow_up_needed", "confirmed", "do_not_contact"] as const;
+export const duplicateStatuses = ["no_duplicate_detected", "possible_duplicate", "reviewed", "merged", "keep_separate"] as const;
 export type ContactStatus = (typeof contactStatuses)[number];
 export type AdminContactErrors = Partial<Record<"firstName" | "lastName" | "email" | "roles" | "otherRole" | "countryRegion" | "status", string>>;
 
@@ -12,6 +13,7 @@ export type AdminContactUpdate = {
 
 const allowedRoles = new Set<string>(roleOptions);
 const allowedStatuses = new Set<string>(contactStatuses);
+const allowedDuplicateStatuses = new Set<string>(duplicateStatuses);
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/u;
 
 function text(formData: FormData, name: string, max: number, required = false, errors?: AdminContactErrors) {
@@ -52,5 +54,7 @@ export function validateAdminContactUpdate(formData: FormData): { success: true;
 export function parseAdminListParams(params: Record<string, string | string[] | undefined>) {
   const value = (name: string) => typeof params[name] === "string" ? params[name] : "";
   const pageValue = Number.parseInt(value("page"), 10);
-  return { query: value("q").trim().slice(0, 100), status: allowedStatuses.has(value("status")) ? value("status") : "", country: countryRegionValues.has(value("country")) ? value("country") : "", role: allowedRoles.has(value("role")) ? value("role") : "", archived: value("archived") === "all" || value("archived") === "archived" ? value("archived") : "active", page: Number.isFinite(pageValue) && pageValue > 0 ? pageValue : 1 };
+  return { query: value("q").trim().slice(0, 100), status: allowedStatuses.has(value("status")) ? value("status") : "", duplicate: allowedDuplicateStatuses.has(value("duplicate")) ? value("duplicate") : "", country: countryRegionValues.has(value("country")) ? value("country") : "", role: allowedRoles.has(value("role")) ? value("role") : "", archived: value("archived") === "all" || value("archived") === "archived" ? value("archived") : "active", page: Number.isFinite(pageValue) && pageValue > 0 ? pageValue : 1 };
 }
+
+export function isAllowedDuplicateReviewAction(value: string): value is "reviewed" | "keep_separate" { return value === "reviewed" || value === "keep_separate"; }
