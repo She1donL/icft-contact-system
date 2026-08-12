@@ -49,10 +49,10 @@ describe("public submission security boundary", () => {
     const blocked = await processPublicContactSubmission(validForm(), { clientIdentifier: "ip:test", isRateLimitedSubmissionAllowed: async () => false, verifyTurnstile: async () => true, insertContact: async () => ({ success: true }) });
     const honeypotForm = validForm(); honeypotForm.set("website", "bot");
     const honeypot = await processPublicContactSubmission(honeypotForm, { clientIdentifier: "ip:test", isRateLimitedSubmissionAllowed: async () => true, verifyTurnstile: async () => true, insertContact: async () => ({ success: true }) });
-    const insertFailure = await processPublicContactSubmission(validForm(), { clientIdentifier: "ip:test", isRateLimitedSubmissionAllowed: async () => true, verifyTurnstile: async () => true, insertContact: async () => ({ success: false, stage: "supabase_insert" }) });
+    const insertFailure = await processPublicContactSubmission(validForm(), { clientIdentifier: "ip:test", isRateLimitedSubmissionAllowed: async () => true, verifyTurnstile: async () => true, insertContact: async () => ({ success: false, stage: "supabase_insert", diagnostic: { code: "23514", category: "constraint_violation" } }) });
     for (const result of [blocked, honeypot, insertFailure]) expect(result).toMatchObject({ success: false, errors: { form: "We could not submit your information. Please try again." } });
     expect(warning).toHaveBeenCalledWith("contact submission failed at rate_limit");
-    expect(warning).toHaveBeenCalledWith("contact submission failed at supabase_insert");
+    expect(warning).toHaveBeenCalledWith("contact submission failed at supabase_insert code=23514 category=constraint_violation");
     warning.mockRestore();
   });
 

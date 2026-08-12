@@ -4,7 +4,11 @@ import { isHoneypotTriggered, type ContactInsert, type ContactSubmissionErrors, 
 
 type ContactInsertResult =
   | { success: true }
-  | { success: false; stage: "supabase_client_initialization" | "supabase_insert" };
+  | {
+    success: false;
+    stage: "supabase_client_initialization" | "supabase_insert";
+    diagnostic?: { code?: string; category: "authentication" | "permission" | "column_missing" | "constraint_violation" | "type_mismatch" | "trigger_failure" | "unknown" };
+  };
 
 type PublicSubmissionDependencies = {
   clientIdentifier: string;
@@ -17,8 +21,13 @@ export type PublicSubmissionResult = { success: true } | { success: false; error
 
 const genericFailure = { success: false, errors: { form: "We could not submit your information. Please try again." } } as const;
 
-function logContactSubmissionFailure(stage: "rate_limit" | "turnstile" | "supabase_client_initialization" | "supabase_insert") {
-  console.warn(`contact submission failed at ${stage}`);
+function logContactSubmissionFailure(
+  stage: "rate_limit" | "turnstile" | "supabase_client_initialization" | "supabase_insert",
+  diagnostic?: { code?: string; category: "authentication" | "permission" | "column_missing" | "constraint_violation" | "type_mismatch" | "trigger_failure" | "unknown" },
+) {
+  const code = diagnostic?.code ? ` code=${diagnostic.code}` : "";
+  const category = diagnostic ? ` category=${diagnostic.category}` : "";
+  console.warn(`contact submission failed at ${stage}${code}${category}`);
 }
 
 export async function processPublicContactSubmission(formData: FormData, dependencies: PublicSubmissionDependencies): Promise<PublicSubmissionResult> {
@@ -51,7 +60,7 @@ export async function processPublicContactSubmission(formData: FormData, depende
   try {
     const insertResult = await dependencies.insertContact(validation.data);
     if (!insertResult.success) {
-      logContactSubmissionFailure(insertResult.stage);
+      logContactSubmissionFailure(insertResult.stage, insertResult.diagnostic);
       return genericFailure;
     }
   } catch {
