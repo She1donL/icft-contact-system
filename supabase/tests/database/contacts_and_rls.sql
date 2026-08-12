@@ -76,13 +76,13 @@ select ok(not has_function_privilege('anon', 'private.is_approved_admin()', 'exe
 select ok(has_function_privilege('authenticated', 'private.is_approved_admin()', 'execute'), 'authenticated can execute private.is_approved_admin for RLS evaluation');
 select ok(exists (select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.proname = 'refresh_contact_duplicate_status' and p.prosecdef), 'duplicate trigger function runs with controlled definer privileges');
 select ok(not has_function_privilege('authenticated', 'public.recalculate_duplicate_status(text)', 'execute'), 'authenticated cannot directly invoke duplicate recalculation');
+select ok(not has_function_privilege('service_role', 'public.recalculate_duplicate_status(text)', 'execute'), 'service_role cannot directly invoke duplicate recalculation');
 
 select ok(has_table_privilege('service_role', 'public.contacts', 'INSERT'), 'service_role can insert contacts for the server-side submission boundary');
 select ok(has_table_privilege('service_role', 'public.contacts', 'UPDATE'), 'service_role can run duplicate-status updates triggered by a submission');
 select ok(has_table_privilege('service_role', 'public.contacts', 'SELECT'), 'service_role can query duplicate groups triggered by a submission');
 select ok(not has_table_privilege('service_role', 'public.contacts', 'DELETE'), 'service_role has no unnecessary contacts delete privilege');
 select ok(has_sequence_privilege('service_role', 'public.contact_record_id_seq', 'USAGE'), 'service_role can generate a contact record ID through the insert trigger');
-select ok(has_function_privilege('service_role', 'public.recalculate_duplicate_status(text)', 'EXECUTE'), 'service_role can run duplicate-status recalculation triggered by a submission');
 
 set local role service_role;
 select lives_ok(
