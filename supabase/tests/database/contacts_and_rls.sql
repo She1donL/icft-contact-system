@@ -1,6 +1,6 @@
 begin;
 
-select plan(29);
+select plan(37);
 
 insert into public.contacts (first_name, last_name, email, roles, country_region, conference_updates_consent)
 values ('Ada', 'Lovelace', 'ada@example.test', array['Researcher'], 'Canada', true);
@@ -72,6 +72,23 @@ select ok(not has_schema_privilege('anon', 'private', 'usage'), 'anon cannot use
 select ok(has_schema_privilege('authenticated', 'private', 'usage'), 'authenticated has only required private schema usage');
 select ok(not has_function_privilege('anon', 'private.is_approved_admin()', 'execute'), 'anon cannot execute private.is_approved_admin');
 select ok(has_function_privilege('authenticated', 'private.is_approved_admin()', 'execute'), 'authenticated can execute private.is_approved_admin for RLS evaluation');
+
+select ok(has_table_privilege('service_role', 'public.contacts', 'INSERT'), 'service_role can insert contacts for the server-side submission boundary');
+select ok(has_table_privilege('service_role', 'public.contacts', 'UPDATE'), 'service_role can run duplicate-status updates triggered by a submission');
+select ok(has_table_privilege('service_role', 'public.contacts', 'SELECT'), 'service_role can query duplicate groups triggered by a submission');
+select ok(not has_table_privilege('service_role', 'public.contacts', 'DELETE'), 'service_role has no unnecessary contacts delete privilege');
+select ok(has_sequence_privilege('service_role', 'public.contact_record_id_seq', 'USAGE'), 'service_role can generate a contact record ID through the insert trigger');
+select ok(has_function_privilege('service_role', 'public.recalculate_duplicate_status(text)', 'EXECUTE'), 'service_role can run duplicate-status recalculation triggered by a submission');
+
+set local role service_role;
+select lives_ok(
+  $$insert into public.contacts (first_name, last_name, email, roles, country_region, conference_updates_consent)
+    values ('Backend', 'Submission', 'backend-submission@example.test', array['Researcher'], 'CA', true)$$,
+  'service_role can insert a contact through the trigger-backed backend path'
+);
+reset role;
+
+select ok((select relforcerowsecurity from pg_class where oid = 'public.contacts'::regclass), 'RLS remains forced for contacts');
 
 select * from finish();
 rollback;
