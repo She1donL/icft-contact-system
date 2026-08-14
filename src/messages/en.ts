@@ -23,3 +23,19 @@ export const messages = {
     genericError: "We could not submit your information. Please try again.",
   },
 } as const;
+
+export const siteContentDefaults = {
+  organization_name: "International Conference on Forestry and Tourism",
+  footer_text: "International Conference on Forestry and Tourism",
+  home_title: messages.landing.title,
+  home_intro: messages.landing.introduction,
+  home_cta_label: messages.landing.submitButton,
+  home_secondary_text: messages.landing.availabilityNote,
+  contact_title: messages.contact.title,
+  contact_intro: messages.contact.introduction,
+  contact_privacy_top: messages.contact.privacy,
+  contact_privacy_submit: messages.contact.privacy,
+  contact_submit_label: messages.contact.submit,
+  success_title: "Thank you",
+  success_message: messages.contact.success,
+} as const;

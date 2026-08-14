@@ -12,7 +12,7 @@ function FieldError({ id, message }: { id: string; message?: string }) {
   return message ? <p id={id} className={styles.error}>{message}</p> : null;
 }
 
-export function ContactForm() {
+export function ContactForm({ privacy, submitLabel }: { privacy?: string; submitLabel?: string }) {
   const [state, formAction, pending] = useActionState(submitContact, initialContactSubmissionState);
   const [hasOtherRole, setHasOtherRole] = useState(false);
   const errors = state?.errors ?? {};
@@ -33,8 +33,8 @@ export function ContactForm() {
     <label>General Field of Research or Professional Interest <input name="generalField" aria-describedby="generalField-help generalField-error" /><span id="generalField-help" className={styles.help}>Please provide a broad field, such as Forestry, Public Health, Medicine, Psychology, Tourism, or Education.</span></label><FieldError id="generalField-error" message={errors.generalField} />
     <label>Specific Research Area or Professional Interest <textarea name="specificResearchArea" rows={5} aria-describedby="specificResearchArea-help specificResearchArea-error" /><span id="specificResearchArea-help" className={styles.help}>Please briefly describe your specific research area, professional focus, or topic of interest.</span></label><FieldError id="specificResearchArea-error" message={errors.specificResearchArea} />
     <fieldset aria-describedby="conferenceUpdatesConsent-error"><legend>Would you like to receive conference announcements and related updates by email?</legend><label className={styles.choice}><input type="radio" name="conferenceUpdatesConsent" value="yes" required />Yes</label><label className={styles.choice}><input type="radio" name="conferenceUpdatesConsent" value="no" required />No</label></fieldset><FieldError id="conferenceUpdatesConsent-error" message={errors.conferenceUpdatesConsent} />
-    <p className={styles.privacy}>{messages.contact.privacy}</p>
+    <p className={styles.privacy}>{privacy ?? messages.contact.privacy}</p>
     <TurnstileWidget siteKey={siteKey} resetSignal={errors.form} />
-    <button type="submit" disabled={pending || !siteKey} aria-disabled={pending || !siteKey}>{pending ? messages.contact.submitting : messages.contact.submit}</button>
+    <button type="submit" disabled={pending || !siteKey} aria-disabled={pending || !siteKey}>{pending ? messages.contact.submitting : submitLabel ?? messages.contact.submit}</button>
   </form>;
 }

@@ -1,6 +1,6 @@
-import { messages } from "@/messages/en";
+import { getPublicSiteContent } from "@/lib/site-content";
 import styles from "../page.module.css";
 
-export default function ContactSuccessPage() {
-  return <main className={styles.page}><section className={styles.card}><p>{messages.contact.success}</p></section></main>;
+export default async function ContactSuccessPage() { const content = await getPublicSiteContent();
+  return <main className={styles.page}><section className={styles.card}><h1>{content.success_title}</h1><p>{content.success_message}</p></section></main>;
 }

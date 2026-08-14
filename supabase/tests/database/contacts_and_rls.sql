@@ -1,6 +1,6 @@
 begin;
 
-select plan(42);
+select plan(49);
 
 insert into public.contacts (first_name, last_name, email, roles, country_region, conference_updates_consent)
 values ('Ada', 'Lovelace', 'ada@example.test', array['Researcher'], 'Canada', true);
@@ -97,6 +97,27 @@ select lives_ok(
 reset role;
 
 select ok((select relforcerowsecurity from pg_class where oid = 'public.contacts'::regclass), 'RLS remains forced for contacts');
+
+set local role anon;
+select is((select home_title from public.site_settings where id = true), 'Stay connected with ICFT.', 'anonymous users can read public site content');
+select throws_ok($$update public.site_settings set home_title = 'Anonymous change' where id = true$$, '42501', 'permission denied for table site_settings', 'anonymous users cannot update site content');
+reset role;
+
+set local role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000101', true);
+update public.site_settings set home_title = 'Unapproved change' where id = true;
+select is((select home_title from public.site_settings where id = true), 'Stay connected with ICFT.', 'an unapproved user cannot update site content');
+reset role;
+
+set local role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000102', true);
+update public.site_settings set home_title = 'Approved change' where id = true;
+select is((select home_title from public.site_settings where id = true), 'Approved change', 'an approved administrator can update site content');
+reset role;
+
+select ok((select relrowsecurity from pg_class where oid = 'public.site_settings'::regclass), 'RLS is enabled for site settings');
+select ok((select relforcerowsecurity from pg_class where oid = 'public.site_settings'::regclass), 'RLS is forced for site settings');
+select policies_are('public', 'site_settings', array['approved administrators can update site content', 'public users can read site content'], 'site settings expose only public-read and approved-admin-update policies');
 
 select * from finish();
 rollback;
