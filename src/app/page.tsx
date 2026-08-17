@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { messages } from "@/messages/en";
 import { getPublicSiteContent } from "@/lib/site-content";
@@ -8,7 +9,7 @@ export default async function Home() { const content = await getPublicSiteConten
     <main className={styles.page}>
       <section className={styles.hero} aria-labelledby="page-title">
         <p className={styles.eyebrow}>{content.organization_name}</p>
-        <div className={styles.logoPlaceholder} aria-label={messages.landing.logoAlt}>ICFT</div>
+        <Image className={styles.logo} src="/icft-logo.jpg" alt="International Council of Forest Therapy logo" width={1254} height={1254} priority />
         <h1 id="page-title">{content.home_title}</h1>
         <p className={styles.introduction}>{content.home_intro}</p>
         <Link className={styles.cta} href="/contact">{content.home_cta_label}</Link>

@@ -1,7 +1,7 @@
 export const messages = {
   landing: {
     eyebrow: "International Conference on Forestry and Tourism",
-    logoAlt: "ICFT logo placeholder",
+    logoAlt: "International Council of Forest Therapy logo",
     title: "Stay connected with ICFT.",
     introduction: "ICFT is preparing a simple way for members of our community to share their contact and professional information.",
     submitButton: "Submit Your Information",

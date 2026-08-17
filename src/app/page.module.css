@@ -2,7 +2,7 @@
 .hero, .details { max-width: 1080px; margin: 0 auto; }
 .hero { min-height: min(680px, calc(100vh - 48px)); display: flex; flex-direction: column; justify-content: center; align-items: flex-start; padding: clamp(48px, 10vw, 112px); border-radius: 24px; color: #f9fbfa; background: #164a3d; }
 .eyebrow { margin-bottom: 24px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #b9d8c7; }
-.logoPlaceholder { display: grid; width: 76px; height: 76px; place-items: center; margin-bottom: 32px; border: 1px solid #9cc7af; border-radius: 50%; font-size: 0.9rem; font-weight: 800; letter-spacing: 0.08em; }
+.logo { width:clamp(92px, 12vw, 132px); height:auto; margin-bottom:28px; border-radius:50%; background:#fff; object-fit:contain; }
 .hero h1 { max-width: 760px; font-size: clamp(2.5rem, 6vw, 5rem); line-height: 1.04; letter-spacing: -0.045em; }
 .introduction { max-width: 650px; margin-top: 24px; font-size: clamp(1.05rem, 2vw, 1.25rem); line-height: 1.65; color: #dbece2; }
 .cta { margin-top: 40px; padding: 15px 22px; border: 0; border-radius: 8px; font: inherit; font-weight: 700; color: #164a3d; background: #fff; text-decoration: none; }
