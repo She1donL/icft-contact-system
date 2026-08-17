@@ -10,6 +10,12 @@ function form(overrides: Record<string, string> = {}) {
 }
 
 describe("site content validation", () => {
+  it("provides the updated contact-page defaults", () => {
+    expect(siteContentDefaults.contact_title).toBe("Connect with ICFT");
+    expect(siteContentDefaults.contact_intro).toContain("Please complete the form below");
+    expect(siteContentDefaults.contact_privacy_top).toBe("Your information will be kept private and will only be accessible to authorized ICFT organizers.");
+  });
+
   it("trims accepted plain-text values", () => {
     const result = validateSiteContent(form({ home_title: "  Welcome to ICFT  " }));
     expect(result).toEqual(expect.objectContaining({ success: true }));

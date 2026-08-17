@@ -1,5 +1,8 @@
 .page { min-height: 100vh; padding: 16px; background: #f4f7f5; }
-.card { width: min(100%, 720px); margin: 0 auto; padding: clamp(24px, 6vw, 48px); border-radius: 16px; background: #fff; box-shadow: 0 10px 30px #164a3d1a; }
-.card > h1 { color: #164a3d; font-size: clamp(2rem, 7vw, 3rem); line-height: 1.1; }
-.card > p { margin-top: 16px; line-height: 1.6; color: #31433a; }
-.card > aside { margin: 20px 0; padding: 14px; border-radius: 8px; line-height: 1.5; color: #31433a; background: #e3efe8; }
+.card { width: min(100%, 760px); margin: 0 auto; padding: clamp(24px, 5vw, 44px); border-radius: 12px; background: #fff; box-shadow: 0 8px 24px #164a3d14; }
+.introduction { max-width: 650px; }
+.introduction h1 { color: #164a3d; font-size: clamp(2rem, 4vw, 2.65rem); line-height: 1.16; letter-spacing: -.02em; }
+.introduction p { margin-top: 14px; line-height: 1.65; color: #31433a; }
+.introduction .note { padding-left: 14px; border-left: 3px solid #87ad98; color: #42534a; }
+.introduction aside { margin: 22px 0 28px; padding: 14px 16px; border-radius: 8px; line-height: 1.55; color: #31433a; background: #e3efe8; }
+@media (max-width: 640px) { .page { padding:12px; } .card { padding:24px 20px; } .introduction h1 { font-size:2rem; } }
