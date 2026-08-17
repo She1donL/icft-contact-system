@@ -24,6 +24,11 @@ describe("validateContactSubmission", () => {
     expect(validateContactSubmission(form)).toMatchObject({ success: false, errors: { otherRole: "Please specify your role." } });
   });
 
+  it("accepts Indigenous Group as a canonical role", () => {
+    const form = validForm(); form.delete("roles"); form.append("roles", "Indigenous Group");
+    expect(validateContactSubmission(form)).toMatchObject({ success: true, data: { roles: ["Indigenous Group"] } });
+  });
+
   it("requires explicit consent", () => {
     const form = validForm(); form.delete("conferenceUpdatesConsent");
     expect(validateContactSubmission(form)).toMatchObject({ success: false, errors: { conferenceUpdatesConsent: "Select Yes or No." } });

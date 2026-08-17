@@ -8,6 +8,7 @@ export const roleOptions = [
   "Industry / Business Representative",
   "Professional Association Representative",
   "Community Member",
+  "Indigenous Group",
   "Independent Professional",
   "Other",
 ] as const;
