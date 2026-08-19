@@ -79,11 +79,15 @@ Missing email alone does not lower research relevance and does not require rejec
 
 ### `needs_review`
 
+`needs_review` is a persisted Research Prospect state, not an exclusion decision. A candidate with established identity and ICFT relevance plus auditable evidence should normally be stored in `research_prospects` even when current role, affiliation, email, or source recency remains unresolved. Record the uncertainty in verification fields, notes, and verification flags.
+
 Use `needs_review` for a role or affiliation conflict, possible duplicate, stale or conflicting source, inadequately confirmed current affiliation, group-membership-only evidence, uncertain individual relevance, or an email found only in a scholarly publication while the current institution is uncertain.
 
 ### `rejected`
 
-Use `rejected` when research establishes that the person is outside ICFT scope. Do not retain weak records merely to meet a target count.
+Use `rejected` (or do not insert) only when identity, ICFT relevance, or auditable evidence is insufficient, or when research establishes that the person is outside ICFT scope. Do not retain weak records merely to meet a target count.
+
+In short: `verified` means fully verified with no unresolved flags; `pending` means a good, clean Prospect with incomplete enrichment such as a missing public email; `needs_review` means a relevant Prospect with a material uncertainty or conflict requiring human review; and `rejected`/not inserted means insufficient identity, relevance, or evidence, or out-of-scope work.
 
 ## Evidence and email rules
 
