@@ -33,6 +33,8 @@ Before releasing the public QR code, configure Cloudflare Turnstile and Upstash 
 
 Research Prospects are externally researched professional candidates, maintained separately from `contacts`. Contacts are self-submitted or known contacts from the public QR-code form; Research Prospects are never created by that form and are not eligible for communications merely because a public professional email was found.
 
+Future discovery and import work follows the permanent [Research Prospect Pipeline](docs/research-prospect-pipeline.md). It defines priority, evidence, verification, review-status, duplicate-check, direct-database, and reporting rules.
+
 The Research Prospects module uses `research_prospects`, `research_prospect_sources`, `research_tags`, `research_prospect_tag_assignments`, and `research_prospect_flags`. Only approved administrators can access these tables. Sources preserve the evidence behind identity, affiliation, relevance, and public-email verification; verification flags identify issues that need review.
 
 Priorities describe research-management relevance, not personal quality: `P1` direct ICFT/forest-health relevance, `P2` strong adjacent nature-and-health relevance, and `P3` broader professional or network relevance. Review statuses are `pending`, `verified`, `needs_review`, and `rejected`.
