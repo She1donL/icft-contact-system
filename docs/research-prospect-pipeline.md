@@ -107,9 +107,24 @@ Never guess an email, infer an institutional email pattern, or use enrichment, l
 
 Every inserted Prospect needs auditable source records. Record the current official evidence wherever available, preserve source URLs and relevant dates, and create verification flags for unresolved issues.
 
+## Complete Prospect package
+
+The normal unit of work is one person: research, verify, classify, source, tag, flag when needed, duplicate check, insert or update, then move to the next person. Do not insert only a core name row and intentionally defer obvious Sources, Tags, Flags, or verification work to a later enrichment run.
+
+For every retained Prospect, complete all applicable parts of the package during the same candidate audit whenever reasonably possible:
+
+- Core information: first and last name; preferred name when publicly relevant; organization or institution; position or professional title; country or region; explicitly public professional email when available; `discovery_batch`; priority; review status; and `last_verified_at`.
+- The four independent verification fields: `identity_verified`, `affiliation_verified`, `relevance_verified`, and `email_verified`.
+- At least one auditable source, with multiple sources where different claims need separate support. Current role or identity evidence and email evidence may come from different sources.
+- Relevant reusable Research Prospect tags, without creating unnecessary near-duplicate tags.
+- A persisted verification flag for each material uncertainty, such as `stale_source`, `role_conflict`, `group_only_evidence`, `low_individual_relevance`, `possible_duplicate`, or affiliation uncertainty.
+- A duplicate check against normalized public email, name plus organization, and obvious identity equivalence before insertion.
+
+Do not invent optional values merely to complete a field. Unknown optional information may remain blank. Missing public email alone normally results in `pending`, rather than `needs_review`, when the rest of the record is clean. Do not leave the reason for `needs_review` only in a chat or final report: persist it in the record's verification fields, notes, and flags.
+
 ## Required workflow
 
-For every future research task:
+For every future research task, complete candidate N's package before moving to candidate N+1 unless a genuine execution or tool failure prevents it:
 
 1. Identify high-quality research groups, networks, and institutions.
 2. Discover relevant people.
@@ -118,15 +133,19 @@ For every future research task:
 5. Verify current affiliation and position.
 6. Evaluate individual ICFT relevance.
 7. Search for an explicitly public professional email.
-8. Collect auditable sources.
-9. Assign research tags.
+8. Collect all applicable auditable sources.
+9. Assign relevant reusable research tags.
 10. Assign P1, P2, or P3.
 11. Apply the four independent verification fields.
 12. Apply the review-status rules in this document.
-13. Check duplicates against existing `research_prospects`.
-14. Create or update Research Prospects only as permitted by the requested workflow.
+13. Add verification flags and notes for material uncertainty.
+14. Check duplicates against existing `research_prospects`.
+15. Create or update the complete Prospect package only as permitted by the requested workflow.
+16. Confirm the final outcome, public-email decision, sources, tags, flags when needed, duplicate check, and `last_verified_at` before moving on.
 
 Duplicate checks must include normalized public-email exact matches and name plus organization for records without email. Do not merge uncertain duplicates automatically; flag or report them for review.
+
+Defer a required package component only for a genuine execution or tool failure. In that case, explicitly report what remains incomplete; do not describe the insertion as a fully complete Prospect package.
 
 ## Direct database safeguards
 
@@ -153,7 +172,9 @@ Do not write research-discovered people to `contacts`. Do not automatically merg
 
 Every completed research run must report:
 
-- candidates found and inserted;
+- complete Prospect packages inserted;
+- duplicates and rejected candidates separately;
+- any retained records whose package could not be completed because of a genuine execution failure;
 - `verified`, `pending`, `needs_review`, and `rejected` counts;
 - P1, P2, and P3 counts;
 - verified and missing public-email counts;
