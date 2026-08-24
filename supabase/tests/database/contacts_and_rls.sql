@@ -37,10 +37,10 @@ insert into auth.users (id, instance_id, aud, role, email, encrypted_password, e
 values
   ('00000000-0000-0000-0000-000000000101', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'non-admin@example.test', '', now(), '{}'::jsonb, '{}'::jsonb, now(), now()),
   ('00000000-0000-0000-0000-000000000102', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'approved-admin@example.test', '', now(), '{}'::jsonb, '{}'::jsonb, now(), now());
-insert into public.admin_profiles (id, is_approved, approved_at)
+insert into public.admin_profiles (id, is_approved, approved_at, role, status)
 values
-  ('00000000-0000-0000-0000-000000000101', false, null),
-  ('00000000-0000-0000-0000-000000000102', true, now());
+  ('00000000-0000-0000-0000-000000000101', false, null, 'admin', 'pending'),
+  ('00000000-0000-0000-0000-000000000102', true, now(), 'admin', 'active');
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000101', true);

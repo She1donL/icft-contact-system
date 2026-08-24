@@ -1,0 +1,9 @@
+insert into auth.users (id, instance_id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+values
+  ('00000000-0000-0000-0000-000000000901', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'legacy-approved@example.test', '', now(), '{}'::jsonb, '{}'::jsonb, now(), now()),
+  ('00000000-0000-0000-0000-000000000902', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'legacy-unapproved@example.test', '', now(), '{}'::jsonb, '{}'::jsonb, now(), now());
+
+insert into public.admin_profiles (id, is_approved, approved_at)
+values
+  ('00000000-0000-0000-0000-000000000901', true, now()),
+  ('00000000-0000-0000-0000-000000000902', false, null);

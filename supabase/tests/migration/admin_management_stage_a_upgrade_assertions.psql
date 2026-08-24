@@ -1,0 +1,51 @@
+create extension if not exists pgtap with schema extensions;
+
+begin;
+
+set local search_path = public, extensions;
+
+select plan(8);
+
+select is(
+  (select role::text from public.admin_profiles where id = '00000000-0000-0000-0000-000000000901'),
+  'admin',
+  'an existing approved profile is backfilled as admin'
+);
+select is(
+  (select status::text from public.admin_profiles where id = '00000000-0000-0000-0000-000000000901'),
+  'active',
+  'an existing approved profile is backfilled as active'
+);
+select is(
+  (select role::text from public.admin_profiles where id = '00000000-0000-0000-0000-000000000902'),
+  'admin',
+  'an unresolved legacy unapproved profile is backfilled as admin'
+);
+select is(
+  (select status::text from public.admin_profiles where id = '00000000-0000-0000-0000-000000000902'),
+  'pending',
+  'an unresolved legacy unapproved profile is preserved conservatively as pending'
+);
+select is(
+  (select count(*) from public.admin_profiles where role = 'owner'),
+  0::bigint,
+  'the Stage A migration does not assign an owner'
+);
+select is(
+  (select count(*) from public.admin_profiles where status = 'revoked'),
+  0::bigint,
+  'the Stage A migration does not invent a revoked history'
+);
+
+set local role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000901', true);
+select ok((select private.is_approved_admin()), 'the migrated approved administrator retains approved-admin access');
+reset role;
+
+set local role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000902', true);
+select ok(not (select private.is_approved_admin()), 'the migrated unresolved unapproved profile remains denied');
+reset role;
+
+select * from finish();
+rollback;
