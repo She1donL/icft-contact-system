@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { recoveryFailureCategory } from "@/lib/auth/recovery-diagnostics";
+import { passwordValidationCategory, recoveryFailureCategory } from "@/lib/auth/recovery-diagnostics";
 
 describe("password recovery diagnostics", () => {
   it("classifies PKCE verifier failures without exposing the provider error", () => {
@@ -11,5 +11,11 @@ describe("password recovery diagnostics", () => {
     expect(recoveryFailureCategory({ code: "otp_expired" })).toBe("invalid-link");
     expect(recoveryFailureCategory({ code: "unexpected_failure" })).toBe("exchange");
     expect(recoveryFailureCategory(null)).toBe("exchange");
+  });
+
+  it("uses only the project password policy categories", () => {
+    expect(passwordValidationCategory("")).toBe("password-required");
+    expect(passwordValidationCategory("short")).toBe("password-too-short");
+    expect(passwordValidationCategory("a-safe-new-password")).toBeNull();
   });
 });

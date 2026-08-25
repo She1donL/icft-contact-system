@@ -1,4 +1,14 @@
-export type RecoveryFailureCategory = "invalid-link" | "pkce" | "exchange" | "missing-session" | "password-update" | "password-invalid";
+export type RecoveryFailureCategory =
+  | "invalid-link"
+  | "pkce"
+  | "exchange"
+  | "missing-session"
+  | "password-update"
+  | "password-required"
+  | "password-too-short";
+
+export const recoveryPasswordFieldName = "password";
+export const recoveryPasswordMinLength = 8;
 
 type AuthErrorLike = { code?: string } | null | undefined;
 
@@ -10,4 +20,9 @@ export function recoveryFailureCategory(error: AuthErrorLike): RecoveryFailureCa
 
 export function recoveryFailurePath(category: RecoveryFailureCategory): string {
   return `/auth/update-password?error=${category}`;
+}
+
+export function passwordValidationCategory(password: string): "password-required" | "password-too-short" | null {
+  if (!password) return "password-required";
+  return password.length < recoveryPasswordMinLength ? "password-too-short" : null;
 }

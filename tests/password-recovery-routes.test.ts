@@ -64,6 +64,21 @@ describe("password recovery routes", () => {
     expect(auth.updateUser).toHaveBeenCalledWith({ password: "a-safe-new-password" });
   });
 
+  it("rejects a missing password before reading the recovery session", async () => {
+    await expect(updatePassword(new FormData())).rejects.toThrow("redirect:/auth/update-password?error=password-required");
+    expect(auth.getUser).not.toHaveBeenCalled();
+    expect(auth.updateUser).not.toHaveBeenCalled();
+  });
+
+  it("rejects a password shorter than the eight-character UI requirement", async () => {
+    const formData = new FormData();
+    formData.set("password", "short");
+
+    await expect(updatePassword(formData)).rejects.toThrow("redirect:/auth/update-password?error=password-too-short");
+    expect(auth.getUser).not.toHaveBeenCalled();
+    expect(auth.updateUser).not.toHaveBeenCalled();
+  });
+
   it("rejects a password update when the recovery session is missing", async () => {
     auth.getUser.mockResolvedValue({ data: { user: null } });
     const formData = new FormData();
@@ -71,5 +86,14 @@ describe("password recovery routes", () => {
 
     await expect(updatePassword(formData)).rejects.toThrow("redirect:/auth/update-password?error=missing-session");
     expect(auth.updateUser).not.toHaveBeenCalled();
+  });
+
+  it("keeps an authenticated update failure separate from password validation", async () => {
+    auth.updateUser.mockResolvedValue({ error: { code: "unexpected_failure" } });
+    const formData = new FormData();
+    formData.set("password", "a-safe-new-password");
+
+    await expect(updatePassword(formData)).rejects.toThrow("redirect:/auth/update-password?error=password-update");
+    expect(auth.updateUser).toHaveBeenCalledWith({ password: "a-safe-new-password" });
   });
 });
