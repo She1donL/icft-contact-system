@@ -50,10 +50,10 @@ describe("password recovery routes", () => {
   });
 
   it("fails a rejected PKCE recovery code at the password-update page", async () => {
-    auth.exchangeCodeForSession.mockResolvedValue({ error: new Error("expired") });
+    auth.exchangeCodeForSession.mockResolvedValue({ error: { code: "pkce_code_verifier_not_found" } });
     const response = await callback(new Request("https://connect.icft.world/auth/callback?code=expired&next=/auth/update-password"));
 
-    expect(response.headers.get("location")).toBe("https://connect.icft.world/auth/update-password?error=recovery");
+    expect(response.headers.get("location")).toBe("https://connect.icft.world/auth/update-password?error=pkce");
   });
 
   it("updates only an authenticated user password and returns to login", async () => {
@@ -69,7 +69,7 @@ describe("password recovery routes", () => {
     const formData = new FormData();
     formData.set("password", "a-safe-new-password");
 
-    await expect(updatePassword(formData)).rejects.toThrow("redirect:/auth/update-password?error=recovery");
+    await expect(updatePassword(formData)).rejects.toThrow("redirect:/auth/update-password?error=missing-session");
     expect(auth.updateUser).not.toHaveBeenCalled();
   });
 });
