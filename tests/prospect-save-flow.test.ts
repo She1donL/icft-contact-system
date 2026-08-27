@@ -30,4 +30,11 @@ describe("Research Prospect save flow", () => {
     expect(prospectSubmitState("Save prospect", false)).toEqual({ disabled: false, label: "Save prospect" });
     expect(prospectSubmitState("Save prospect", true)).toEqual({ disabled: true, label: "Saving…" });
   });
+
+  it("uses action-specific progress text for other prospect operations", () => {
+    expect(prospectSubmitState("Apply filters", true, "Applying…")).toEqual({
+      disabled: true,
+      label: "Applying…",
+    });
+  });
 });

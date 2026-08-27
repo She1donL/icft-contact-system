@@ -19,6 +19,10 @@ export function prospectSaveFailurePath(id: string, returnTo: string | null | un
   return withReturnTo(id === "new" ? "/admin/prospects/new?error=save" : `/admin/prospects/${id}?error=save`, returnTo);
 }
 
-export function prospectSubmitState(label: string, pending: boolean) {
-  return { disabled: pending, label: pending ? "Saving…" : label };
+export function prospectSubmitState(
+  label: string,
+  pending: boolean,
+  pendingLabel = "Saving…",
+) {
+  return { disabled: pending, label: pending ? pendingLabel : label };
 }
